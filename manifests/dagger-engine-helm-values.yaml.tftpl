@@ -1,0 +1,29 @@
+engine:
+  kind: ${engine_kind}
+  annotations:
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+  image:
+    ref: ${engine_image}
+  resources:
+    requests:
+      cpu: ${cpu_request}
+      memory: ${memory_request}
+  hostPath:
+    dataVolume:
+      enabled: ${engine_mode == "daemonset"}
+  statefulSet:
+    persistentVolumeClaim:
+      enabled: ${engine_mode == "statefulset"}
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: ${persistent_cache_size}
+%{ if storage_class_name != "" ~}
+      storageClassName: ${storage_class_name}
+%{ endif ~}
+%{ if dagger_cloud_token != "" ~}
+magicache:
+  enabled: true
+  token: ${dagger_cloud_token}
+%{ endif ~}
