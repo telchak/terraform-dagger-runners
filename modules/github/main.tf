@@ -9,16 +9,30 @@ locals {
 
 /*****************************************
   Kubernetes Namespaces
+
+  Both namespaces are labelled "privileged"
+  because the Dagger engine requires
+  privileged pods, hostPath volumes, and
+  elevated capabilities (CAP_ALL).
+  Without this, PodSecurity admission
+  (enabled by default since K8s 1.25)
+  blocks engine pod creation.
  *****************************************/
 resource "kubernetes_namespace" "arc_systems" {
   metadata {
     name = var.arc_systems_namespace
+    labels = {
+      "pod-security.kubernetes.io/enforce" = "privileged"
+    }
   }
 }
 
 resource "kubernetes_namespace" "arc_runners" {
   metadata {
     name = var.arc_runners_namespace
+    labels = {
+      "pod-security.kubernetes.io/enforce" = "privileged"
+    }
   }
 
   depends_on = [helm_release.arc]
